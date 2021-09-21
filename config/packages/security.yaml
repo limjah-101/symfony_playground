@@ -1,9 +1,11 @@
 security:
+    access_decision_manager:
+        strategy: affirmative # manage permissions
     encoders:
         App\Entity\User: bcrypt
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
-        #users_in_memory: { memory: null }
+        # users_in_memory: { memory: null } (symfony default conf)
         database_users:
             entity: { class: App\Entity\User, property: username }
     firewalls:
@@ -12,13 +14,26 @@ security:
             security: false
         main:
             anonymous: true #lazy
-            provider: database_users
+            pattern: ^/
+            # provider: users_in_memory (symfony default conf)
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication
 
             # https://symfony.com/doc/current/security/impersonating_user.html
             # switch_user: true
+            form_login:
+                check_path: security_login
+                login_path: security_login
+                csrf_token_generator: security.csrf.token_manager
+                default_target_path: post_index
+                # always_use_default_target_path: false # always redirect user after login to specific url
+                # use_referer: true # redirect ot the last visited page
+                # failure_path:
+            logout:
+                path: security_logout
+                target: post_index
+
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used

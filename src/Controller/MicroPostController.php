@@ -15,6 +15,9 @@ use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
 
+/**
+ * @Route ("posts")
+ */
 class MicroPostController extends AbstractController
 {
     /**

@@ -3,15 +3,25 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @UniqueEntity(fields="email", message="This email is already taken")
+ * @UniqueEntity(fields="username", message="This username is already taken")
  */
 class User implements UserInterface, \Serializable
 {
+    public function __construct()
+    {
+        $this->posts = new ArrayCollection();
+    }
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -20,12 +30,16 @@ class User implements UserInterface, \Serializable
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255, unique=true)
+     * @ORM\Column(type="string", length=50, unique=true)
+     * @Assert\NotBlank()
+     * @Assert\Length (min="3", max="50")
      */
     private $username;
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
+     * @Assert\NotBlank ()
+     * @Assert\Email()
      */
     private $email;
 
@@ -35,9 +49,29 @@ class User implements UserInterface, \Serializable
     private $password;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank ()
+     * @Assert\Length(min="6", max="255")
+     */
+    private $plainPassword;
+    /**
+     * @ORM\Column(type="string", length=50)
+     * @Assert\NotBlank ()
+     * @Assert\Length (min="3", max="50")
      */
     private $fullName;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\MicroPost", mappedBy="user")
+     */
+    private $posts;
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getPosts(): ArrayCollection
+    {
+        return $this->posts;
+    }
 
     public function getId(): ?int
     {
@@ -125,5 +159,21 @@ class User implements UserInterface, \Serializable
             $this->username,
             $this->password
             ) = unserialize($data);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPlainPassword()
+    {
+        return $this->plainPassword;
+    }
+
+    /**
+     * @param mixed $plainPassword
+     */
+    public function setPlainPassword($plainPassword): void
+    {
+        $this->plainPassword = $plainPassword;
     }
 }
