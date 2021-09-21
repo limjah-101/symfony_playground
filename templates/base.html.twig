@@ -7,14 +7,16 @@
         <link rel="stylesheet" href="{{ asset('build/css/app.css') }}">
     {% endblock %}
 </head>
-<body class="bg-light">
-<main role="main" class="container">
 
-    {% block body %}
+<body class="bg-light">
+    <main role="main" class="container">
+        <div class="my-3 p-3 bg-white rounded box-shadow">
+            {% block body %}{% endblock %}
+        </div>
+    </main>
+
+    {% block javascripts %}
+        <script src="{{ asset('build/js/app.js') }}"></script>
     {% endblock %}
-</main>
-{% block javascripts %}
-    <script src="{{ asset('build/js/app.js') }}"></script>
-{% endblock %}
 </body>
 </html>
