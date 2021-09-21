@@ -12,10 +12,14 @@
         <a href="{{ path('post_show', {'id': post.id}) }}">
             {{ include('micro_post/raw_post.html.twig') }}
         </a>
-        {#<small class="d-block text-right mt-3">
-            <a href="{{ path('post_edit', {'id': post.id}) }}">edit</a>
-            <a href="{{ path('post_delete', {'id': post.id}) }}">delete</a>
-        </small>#}
+        <small class="d-block text-right mt-3">
+            {% if is_granted('EDIT', post) %}
+                <a href="{{ path('post_edit', {'id': post.id}) }}">edit</a>
+            {% endif %}
+            {% if is_granted('DELETE', post) %}
+                <a href="{{ path('post_delete', {'id': post.id}) }}">delete</a>
+            {% endif %}
+        </small>
 
     {% endfor %}
 

@@ -6,6 +6,7 @@ use App\Entity\MicroPost;
 use App\Form\MicroPostType;
 use App\Repository\MicroPostRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -40,6 +41,7 @@ class MicroPostController extends AbstractController
      * @var FlashBagInterface
      */
     private $flashBag;
+
 
     public function __construct(
         MicroPostRepository $microPostRepository,
@@ -101,6 +103,8 @@ class MicroPostController extends AbstractController
     public function edit(MicroPost $post, Request $request)
     {
 
+        $this->denyAccessUnlessGranted('EDIT', $post);
+
         $form = $this->formFactory->create(MicroPostType::class, $post);
         $form->handleRequest($request);
 
@@ -119,9 +123,12 @@ class MicroPostController extends AbstractController
 
     /**
      * @Route ("/delete/{id}", name="post_delete")
+     * @Security ("is_granted('DELETE', post)", message="You are not allowed to do this action")
      */
     public function delete(MicroPost $post)
     {
+        //$this->denyAccessUnlessGranted('DELETE', $post); @DESC Similar to Security Annotation
+
         $this->entityManager->remove($post);
         $this->entityManager->flush();
 
