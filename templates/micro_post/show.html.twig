@@ -2,4 +2,74 @@
 {% block body %}
     <h3>Single post details here</h3>
     {{ include('micro_post/raw_post.html.twig', { 'post': post }) }}
+
+    {% set isLiked = post.getLikedBy.contains(app.user) %}
+
+    <div class="pt-2">
+        <button
+                style="display: {% if not isLiked %} block {% else %} none {% endif %}"
+                class="btn btn-info btn-sm"
+                id="like_btn"
+        >Like<span class="badge badge-light ml-2" id="like_span">{{ post.getLikedBy.count }}</span>
+        </button>
+
+        <button
+                style="display: {% if isLiked %} block {% else %} none {% endif %}"
+                class="btn btn-danger btn-sm"
+                id="unlike_btn"
+        >Unlike<span class="badge badge-light ml-2" id="unlike_span">{{ post.getLikedBy.count }}</span>
+        </button>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        let like_btn = document.getElementById('like_btn');
+        let unlike_btn = document.getElementById('unlike_btn');
+
+        function switchBtn(btn, oppositeBtn) {
+            btn.disabled = false;
+            btn.style.display = 'none';
+            oppositeBtn.style.display = 'block';
+        }
+
+        handleClick(
+            like_btn,
+            unlike_btn,
+            document.getElementById('unlike_span'),
+            '{{ path('like_post', {'id': post.id}) }}'
+        )
+
+        handleClick(
+            unlike_btn,
+            unlike_btn,
+            document.getElementById('like_span'),
+            '{{ path('unlike_post', {'id': post.id}) }}'
+        )
+
+        function handleClick(btn, oppositeBtn, likeCount, path) {
+
+            btn.addEventListener('click', e => {
+                {% if not app.user %}
+                    return window.location.replace('{{ path('security_login') }}')
+                {% endif %}
+
+                e.preventDefault();
+
+                btn.classList.add('disabled')
+
+                fetch(path, {'credentials': 'include'})
+                    .then(res => {
+                        res.json().then(json => {
+                            likeCount.innerText = json.count;
+                            switchBtn(btn, oppositeBtn);
+                        })
+                    })
+                .catch(err => {
+                    switchBtn(btn, oppositeBtn);
+                })
+            });
+        }
+    </script>
 {% endblock %}
