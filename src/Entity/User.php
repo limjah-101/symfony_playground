@@ -221,4 +221,15 @@ class User implements UserInterface, \Serializable
     {
         return $this->following;
     }
+
+    /**
+     * @desc Fix sql error when following user from url
+     */
+    public function follow(User $userToFollow)
+    {
+        if($this->getFollowing()->contains($userToFollow))
+            return;
+
+        $this->getFollowing()->add($userToFollow);
+    }
 }

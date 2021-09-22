@@ -25,7 +25,7 @@ class FollowingController extends AbstractController
         // unable following yourself
         if($userToFollow->getId() != $current_user->getId()) {
 
-            $current_user->getFollowing()->add($userToFollow);
+            $current_user->follow($userToFollow);
             $this->getDoctrine()->getManager()->flush();// No need to call persist | Doctrine auto-prepare the insert query to execute
         }
 
@@ -42,6 +42,7 @@ class FollowingController extends AbstractController
     {
         /**@var User $current_user*/
         $current_user = $this->getUser();
+
         $current_user->getFollowing()->removeElement($userToUnfollow);
 
         $this->getDoctrine()->getManager()->flush();
