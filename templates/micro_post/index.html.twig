@@ -8,20 +8,33 @@
 
     <h6 class="border-bottom border-gray pb-2 mb-0  font-weight-bold">Recent updates</h6>
 
-    {% for post in posts %}
-        <a href="{{ path('post_show', {'id': post.id}) }}">
-            {{ include('micro_post/raw_post.html.twig') }}
-        </a>
-        <small class="d-block text-right mt-3">
-            {% if is_granted('EDIT', post) %}
-                <a href="{{ path('post_edit', {'id': post.id}) }}">edit</a>
-            {% endif %}
-            {% if is_granted('DELETE', post) %}
-                <a href="{{ path('post_delete', {'id': post.id}) }}">delete</a>
-            {% endif %}
-        </small>
+    {% if posts|length > 0 %}
+        {% for post in posts %}
+            <a href="{{ path('post_show', {'id': post.id}) }}">
+                {{ include('micro_post/raw_post.html.twig') }}
+            </a>
+            <small class="d-block text-right mt-3">
+                {% if is_granted('EDIT', post) %}
+                    <a href="{{ path('post_edit', {'id': post.id}) }}">edit</a>
+                {% endif %}
+                {% if is_granted('DELETE', post) %}
+                    <a href="{{ path('post_delete', {'id': post.id}) }}">delete</a>
+                {% endif %}
+            </small>
 
-    {% endfor %}
+        {% endfor %}
+    {% else %}
+        <div class="card">
+            <div class="card-body">
+                <h5>No posts found. Please follow users to get more posts</h5>
+                {% if(users_to_follow|length > 0)%}
+                    {% for user in users_to_follow %}
+                        <a href="{{ path('users_posts', {'username':user.username}) }}" class="mr-3">@{{ user.username }}</a>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
 
 
 {% endblock %}

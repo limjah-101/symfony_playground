@@ -21,10 +21,13 @@ class FollowingController extends AbstractController
     {
         /**@var User $current_user*/
         $current_user = $this->getUser();
-        $current_user->getFollowing()->add($userToFollow);
 
-        // No need to call persist | Doctrine auto-prepare the insert query to execute
-        $this->getDoctrine()->getManager()->flush();
+        // unable following yourself
+        if($userToFollow->getId() != $current_user->getId()) {
+
+            $current_user->getFollowing()->add($userToFollow);
+            $this->getDoctrine()->getManager()->flush();// No need to call persist | Doctrine auto-prepare the insert query to execute
+        }
 
         return $this->redirectToRoute(
             'users_posts',

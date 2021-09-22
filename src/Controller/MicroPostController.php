@@ -6,6 +6,7 @@ use App\Entity\MicroPost;
 use App\Entity\User;
 use App\Form\MicroPostType;
 use App\Repository\MicroPostRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -42,9 +43,14 @@ class MicroPostController extends AbstractController
      * @var FlashBagInterface
      */
     private $flashBag;
+    /**
+     * @var UserRepository
+     */
+    private $userRepository;
 
 
     public function __construct(
+        UserRepository $userRepository,
         MicroPostRepository $microPostRepository,
         FormFactoryInterface $formFactory,
         EntityManagerInterface $entityManager,
@@ -57,6 +63,7 @@ class MicroPostController extends AbstractController
         $this->entityManager = $entityManager;
         $this->router = $router;
         $this->flashBag = $flashBag;
+        $this->userRepository = $userRepository;
     }
 
     /**
@@ -64,9 +71,19 @@ class MicroPostController extends AbstractController
      */
     public function index(): Response
     {
-        echo 'toto';
+        $authenticated_user= $this->getUser();
+        $users_to_follow = [];
+
+        if($authenticated_user instanceof User) {
+            $posts = $this->microPostRepository->getFollowingPosts($authenticated_user->getFollowing());
+            $users_to_follow = count($posts) === 0 ? $this->userRepository->getUsersWith5PostsMoreExceptAuthenticatedUser($authenticated_user) : [];
+        }
+        else
+            $posts = $this->microPostRepository->findBy([], ['time' => 'DESC']);
+
         return $this->render('micro_post/index.html.twig', [
-            'posts' => $this->microPostRepository->findBy([], ['time' => 'DESC'])
+            'posts' => $posts,
+            'users_to_follow' => $users_to_follow
         ]);
     }
 
@@ -96,7 +113,7 @@ class MicroPostController extends AbstractController
     /**
      * @Route ("/{id}", name="post_show")
      */
-    public function show(MicroPost $post)
+    public function show(MicroPost $post): Response
     {
         return $this->render('micro_post/show.html.twig', ['post' => $post]);
     }
@@ -107,9 +124,6 @@ class MicroPostController extends AbstractController
      */
     public function edit(MicroPost $post, Request $request)
     {
-
-        $this->denyAccessUnlessGranted('EDIT', $post);
-
         $form = $this->formFactory->create(MicroPostType::class, $post);
         $form->handleRequest($request);
 
@@ -130,10 +144,9 @@ class MicroPostController extends AbstractController
      * @Route ("/delete/{id}", name="post_delete")
      * @Security ("is_granted('DELETE', post)", message="You are not allowed to perform this action")
      */
-    public function delete(MicroPost $post)
+    public function delete(MicroPost $post): RedirectResponse
     {
         //$this->denyAccessUnlessGranted('DELETE', $post); @DESC Similar to Security Annotation
-
         $this->entityManager->remove($post);
         $this->entityManager->flush();
 
@@ -147,7 +160,7 @@ class MicroPostController extends AbstractController
      * @Route ("/user/{username}", name="users_posts")
      * @Security ("is_granted('ROLE_USER')")
      */
-    public function getUserPosts(User $user)
+    public function getUserPosts(User $user): Response
     {
         return $this->render('micro_post/user_posts.html.twig', [
             'posts' => $this->microPostRepository->findBy(['user' => $user], ['time' => 'DESC']),

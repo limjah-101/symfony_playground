@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\MicroPost;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -17,6 +18,23 @@ class MicroPostRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, MicroPost::class);
+    }
+
+
+    /**
+     * @param Collection $following_users
+     * @return int|mixed|string
+     */
+    public function getFollowingPosts(Collection $following_users)
+    {
+        $query = $this->createQueryBuilder('p');
+        return $query->select('p')
+            ->where('p.user IN (:following_user)' )
+            ->setParameter('following_user', $following_users)
+            ->orderBy('p.time', 'DESC')
+            ->getQuery()
+            ->getResult();
+
     }
 
     // /**
