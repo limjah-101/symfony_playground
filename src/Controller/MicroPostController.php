@@ -63,6 +63,7 @@ class MicroPostController extends AbstractController
      */
     public function index(): Response
     {
+        echo 'toto';
         return $this->render('micro_post/index.html.twig', [
             'posts' => $this->microPostRepository->findBy([], ['time' => 'DESC'])
         ]);
@@ -75,6 +76,7 @@ class MicroPostController extends AbstractController
     {
         $post = new MicroPost();
         $post->setTime(new \DateTime());
+        $post->setUser($this->getUser());
 
         $form = $this->formFactory->create(MicroPostType::class, $post);
         $form->handleRequest($request);
@@ -99,6 +101,7 @@ class MicroPostController extends AbstractController
 
     /**
      * @Route ("/edit/{id}", name="post_edit")
+     * @Security("is_granted('EDIT', post)", message="You are not allowed to perform this action")
      */
     public function edit(MicroPost $post, Request $request)
     {
@@ -123,7 +126,7 @@ class MicroPostController extends AbstractController
 
     /**
      * @Route ("/delete/{id}", name="post_delete")
-     * @Security ("is_granted('DELETE', post)", message="You are not allowed to do this action")
+     * @Security ("is_granted('DELETE', post)", message="You are not allowed to perform this action")
      */
     public function delete(MicroPost $post)
     {

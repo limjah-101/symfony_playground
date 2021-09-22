@@ -13,6 +13,7 @@ class PostVoter extends Voter
 
     const EDIT = "EDIT";
     const DELETE = "DELETE";
+    const CREATE = "CREATE";
     /**
      * @var AccessDecisionManagerInterface
      */
@@ -25,7 +26,7 @@ class PostVoter extends Voter
 
     protected function supports($attribute, $subject): bool
     {
-        if(!in_array($attribute, [self::EDIT, self::DELETE]))
+        if(!in_array($attribute, [self::EDIT, self::DELETE, self::CREATE]))
             return false;
 
         if(!$subject instanceof MicroPost)
