@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\MicroPost;
+use App\Entity\User;
 use App\Form\MicroPostType;
 use App\Repository\MicroPostRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -140,5 +141,17 @@ class MicroPostController extends AbstractController
 
         return new RedirectResponse($this->router->generate("post_index"));
 
+    }
+
+    /**
+     * @Route ("/user/{username}", name="users_posts")
+     * @Security ("is_granted('ROLE_USER')")
+     */
+    public function getUserPosts(User $user)
+    {
+        return $this->render('micro_post/user_posts.html.twig', [
+            'posts' => $this->microPostRepository->findBy(['user' => $user], ['time' => 'DESC']),
+            'user' => $user
+        ]);
     }
 }
